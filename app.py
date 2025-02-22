@@ -146,6 +146,31 @@ def text_to_text():
         return jsonify({'error': 'An error occurred during text generation'}), 500
 
 
+@app.route('/text_to_text_chat', methods=['POST'])
+def text_to_text_chat():
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt')
+
+        # Initialize chat with system instructions
+        TEXT_MODEL = "gemini-2.0-flash-exp"  # Choose the best chat-capable model
+        model=generative_ai.GenerativeModel(TEXT_MODEL)
+        chat = model.start_chat(history=[])
+
+
+        chat = chat.send_message(prompt)
+
+        # Generate response from the chat model
+        response = chat.send_message(prompt)
+
+        generated_text = response['message']['content']
+
+        print(generated_text)  # Debugging output
+        return jsonify({'result': generated_text}), 200
+
+    except Exception as e:
+        print(f"Error (text_to_text): {e}")
+        return jsonify({'error': 'An error occurred during text generation'}), 500
 
 def promptToTextModel(userPromt):
 	return f"{system_prompt_text_model}\n\nUser: {userPromt}"
