@@ -15,9 +15,10 @@ system_prompt_text_model = """
 	- Raises awareness about the unique qualities and benefits of Indian cow breeds
 	- Explains scientific aspects of indigenous breeding programs
 	- Discusses the nutritional benefits of A2 milk from Indian cows
-	- Highlights the socio-economic benefits for rural farmers
+	- Provides detailed data on Indian cow breeds, their characteristics, and ideal breeding conditions, helping farmers choose the best breed based on their location and needs
 	- Outlines the environmental sustainability of traditional cattle rearing
 	- Aligns with the principles of the Kamdhenu Program for cow conservation
+    - provide its bread information, genetic information and  ideal breeding conditions
 	- Limit your response strictly to a maximum of 120 tokens.
 	Only provide information related to Indian cows and their benefits. If asked about unrelated topics,
 	gently redirect the conversation to relevant aspects of Indian cow conservation and promotion.
@@ -58,7 +59,7 @@ def image_to_text():
         response = image_model.generate_content(
             contents=[
                 {"text": system_prompt_image},
-        		{"inline_data": {"mime_type": "image/jpeg", "data": image_base64}},  # ✅ Correct image format
+        		{"inline_data": {"mime_type": "image/jpeg", "data": image_base64}},
         		{"text": prompt if prompt else "Analyze this cow image based on the criteria provided in your instructions."}],
             generation_config={
        		 "temperature": 0.7,
@@ -66,16 +67,16 @@ def image_to_text():
     		}
         )
 
-        generated_text = ""  # Initialize an empty string
+        generated_text = ""
 
-        # Check if the response and candidates exist
-        if response and hasattr(response, "candidates") and response.candidates:  # Protobuf style check
+
+        if response and hasattr(response, "candidates") and response.candidates:
             for candidate in response.candidates:
                 if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
                     for part in candidate.content.parts:
                         if hasattr(part, "text"):
                             generated_text += part.text
-        elif isinstance(response, dict) and "candidates" in response and response["candidates"]:  # Dictionary style check
+        elif isinstance(response, dict) and "candidates" in response and response["candidates"]:
             for candidate in response["candidates"]:
                 if "content" in candidate and "parts" in candidate["content"]:
                     for part in candidate["content"]["parts"]:
@@ -105,7 +106,7 @@ def text_to_text():
         # if not prompt:
         #     return jsonify({'error': 'Prompt is required'}), 400
 
-        TEXT_MODEL = "gemini-2.0-flash-exp"  # A good general-purpose model for text
+        TEXT_MODEL = "gemini-2.0-flash-exp"
         text_model = generative_ai.GenerativeModel(TEXT_MODEL)
 
         response = text_model.generate_content(
@@ -115,20 +116,21 @@ def text_to_text():
        		 "temperature": 0.7,
         	 "max_output_tokens": 250
     		}
+
             # temperature=data.get('temperature', 0.7),
             # max_output_tokens=data.get('max_output_tokens', 512)
         )
 
-        generated_text = ""  # Initialize an empty string
+        generated_text = ""
 
-        # Check if the response and candidates exist
-        if response and hasattr(response, "candidates") and response.candidates:  # Protobuf style check
+
+        if response and hasattr(response, "candidates") and response.candidates:
             for candidate in response.candidates:
                 if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
                     for part in candidate.content.parts:
                         if hasattr(part, "text"):
                             generated_text += part.text
-        elif isinstance(response, dict) and "candidates" in response and response["candidates"]:  # Dictionary style check
+        elif isinstance(response, dict) and "candidates" in response and response["candidates"]:
             for candidate in response["candidates"]:
                 if "content" in candidate and "parts" in candidate["content"]:
                     for part in candidate["content"]["parts"]:
