@@ -20,7 +20,7 @@ To set up the project locally, follow these steps:
 2. **Create a virtual environment (optional but recommended):**
    ```bash
    python3 -m venv env
-   source env/bin/activate  # On Windows, use `venv\Scripts\activate`
+   source env/bin/activate  # On Windows, use `env\Scripts\activate`
    ```
 
 3. **Install the required dependencies:**
