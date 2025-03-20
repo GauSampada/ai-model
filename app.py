@@ -3,11 +3,13 @@ import os
 import google.generativeai as generative_ai
 import base64
 from dotenv import load_dotenv
+from cow_breed_api import cow_breed_bp
 
 load_dotenv()
 app = Flask(__name__)
+app.register_blueprint(cow_breed_bp)
 
-generative_ai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+generative_ai.configure(api_key=os.environ.get("GOOGLE_API"))
 
 system_prompt_text_model = """
 	You are an expert on Indian indigenous cow breeds (desi cows). Your role is to provide accurate,
@@ -24,7 +26,7 @@ system_prompt_text_model = """
 	gently redirect the conversation to relevant aspects of Indian cow conservation and promotion.
 	"""
 system_prompt_image = """
-You are an expert on Indian indigenous cow breeds (desi cows) with knowledge in basic veterinary observation. Your role is to:
+You are an expert on Indian indigenous cow breeds (desi cows) with knowledge in veterinary observation. Your role is to:
 
  When analyzing cow images:
    - Describe any visible skin abnormalities, lesions, or other potential signs of disease in a concise manner
@@ -99,6 +101,7 @@ def image_to_text():
 
 @app.route('/text_to_text', methods=['POST'])
 def text_to_text():
+
     try:
         data = request.get_json()
         prompt = data.get('prompt')
@@ -177,4 +180,4 @@ def text_to_text_chat():
 def promptToTextModel(userPromt):
 	return f"{system_prompt_text_model}\n\nUser: {userPromt}"
 if __name__ == '__main__':
-  app.run(port=5000, host='0.0.0.0',debug=False)
+  app.run(port=5000, host='0.0.0.0',debug=True)

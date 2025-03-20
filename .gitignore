@@ -113,3 +113,4 @@ dmypy.json
 
 # Flask cache
 flask_session/
+.qodo
