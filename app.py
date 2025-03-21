@@ -49,11 +49,15 @@ def image_to_text():
         data = request.get_json()
         image_base64 = data.get('image_base64')
         prompt = data.get('prompt', 'Analyze this cow image based on the criteria provided in your instructions.')
+        language = data.get('language', 'en')
 
         if not image_base64:
             return jsonify({'error': 'Image (base64 encoded) is required'}), 400
 
         image_bytes = base64.b64decode(image_base64)
+
+
+        localized_prompt = f"Please analyze this image and respond in {get_language_name(language)} language. {prompt}"
 
         IMAGE_MODEL = "gemini-2.0-flash-exp"
         image_model = generative_ai.GenerativeModel(IMAGE_MODEL)
@@ -61,16 +65,16 @@ def image_to_text():
         response = image_model.generate_content(
             contents=[
                 {"text": system_prompt_image},
-        		{"inline_data": {"mime_type": "image/jpeg", "data": image_base64}},
-        		{"text": prompt if prompt else "Analyze this cow image based on the criteria provided in your instructions."}],
+                {"inline_data": {"mime_type": "image/jpeg", "data": image_base64}},
+                {"text": localized_prompt},
+            ],
             generation_config={
-       		 "temperature": 0.7,
-        	 "max_output_tokens": 172
-    		}
+                "temperature": 0.7,
+
+            }
         )
 
         generated_text = ""
-
 
         if response and hasattr(response, "candidates") and response.candidates:
             for candidate in response.candidates:
@@ -85,20 +89,47 @@ def image_to_text():
                         if "text" in part:
                             generated_text += part["text"]
 
-        # Improved Error handling
         else:
-            generated_text = "Error: Could not extract text from the model response."  # Or log the error
 
-        print(generated_text)  # Print the extracted text (for debugging)
+            error_messages = {
+                'en': "Error: Could not extract text from the model response.",
+                'hi': "त्रुटि: मॉडल से टेक्स्ट निकालने में असमर्थ।",
+
+            }
+            generated_text = error_messages.get(language, error_messages['en'])
+
+        print(f"Generated text in {language}: {generated_text}")
         return jsonify({'result': generated_text}), 200
-    except Exception as e:
-        print(f"Error (image_to_text): {e}")
-        return jsonify({'error': 'An error occurred during text generation'}), 500
 
     except Exception as e:
         print(f"Error (image_to_text): {e}")
-        return jsonify({'error': 'An error occurred during image to text conversion'}), 500
 
+
+        error_messages = {
+            'en': "An error occurred during image to text conversion",
+            'hi': "छवि से टेक्स्ट रूपांतरण के दौरान एक त्रुटि हुई",
+
+        }
+
+        error_msg = error_messages.get(language, error_messages['en'])
+        return jsonify({'error': error_msg}), 500
+
+def get_language_name(language_code):
+    language_names = {
+        'en': 'English',
+        'hi': 'Hindi',
+        'bn': 'Bengali',
+        'gu': 'Gujarati',
+        'mr': 'Marathi',
+        'ta': 'Tamil',
+        'te': 'Telugu',
+        'kn': 'Kannada',
+        'ml': 'Malayalam',
+        'pa': 'Punjabi',
+        'or': 'Odia',
+
+    }
+    return language_names.get(language_code, 'English')
 @app.route('/text_to_text', methods=['POST'])
 def text_to_text():
 
