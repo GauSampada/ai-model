@@ -9,8 +9,8 @@ load_dotenv()
 app = Flask(__name__)
 app.register_blueprint(cow_breed_bp)
 
-generative_ai.configure(api_key=os.environ.get("GOOGLE_API"))
-
+generative_ai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+print( "Google Generative AI API Key:", os.environ.get("GOOGLE_API_KEY"))
 system_prompt_text_model = """
 	You are an expert on Indian indigenous cow breeds (desi cows). Your role is to provide accurate,
 	educational information that:

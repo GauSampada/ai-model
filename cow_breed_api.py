@@ -10,7 +10,7 @@ import base64
 cow_breed_bp = Blueprint('cow_breed', __name__)
 
 # Configure the Gemini API with your API key
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 # Initialize the model
 model = genai.GenerativeModel(model_name="gemini-2.0-flash-exp")
