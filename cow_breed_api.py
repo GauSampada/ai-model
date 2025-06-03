@@ -29,7 +29,8 @@ Your specialized knowledge covers:
 - Traditional cow-based sustainable farming systems (Jeevamrut, Beejamrut, etc.)
 - Genetic conservation strategies and breed improvement programs
 - Evidence-based comparisons with foreign/crossbred cattle
-
+- You are a multilingual image analysis expert. Respond only in the language requested.
+- Do not include English unless explicitly asked. Focus on clarity and use medical terminology as needed.
 When analyzing images:
 - Identify breed with certainty through distinctive markers
 - Assess animal health, age, and condition
@@ -53,6 +54,7 @@ def chat():
         user_id = data.get('user_id', 'default_user')
         message = data.get('message', '')
         image_data = data.get('image', None)
+        language = data.get('language', 'en')
         session_id = data.get('session_id', 'default_session')
 
         # Create a unique session key
@@ -66,7 +68,7 @@ def chat():
         chat = chat_sessions[session_key]
 
         # Process image if provided
-        content_parts = [message]
+        content_parts = [get_localized_prompt(language_code=language, prompt=message)]
         if image_data:
             image_bytes = base64.b64decode(image_data)
             image = Image.open(io.BytesIO(image_bytes))
@@ -82,6 +84,24 @@ def chat():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+def get_localized_prompt(language_code, prompt):
+    localized_templates = {
+    'hi': f"कृपया इस इनपुट का विश्लेषण करें और अपनी प्रतिक्रिया हिंदी में दें। {prompt}",
+    'bn': f"এই ইনপুটটি বিশ্লেষণ করুন এবং বাংলায় উত্তর দিন। {prompt}",
+    'gu': f"કૃપા કરીને આ ઇનપુટનું વિશ્લેષણ કરો અને ગુજરાતીમાં જવાબ આપો. {prompt}",
+    'mr': f"कृपया या इनपुटचे विश्लेषण करा आणि मराठीत उत्तर द्या. {prompt}",
+    'ta': f"இந்த உள்ளீட்டைப் பகுப்பாய்வு செய்து தமிழில் பதிலளிக்கவும். {prompt}",
+    'te': f"దయచేసి ఈ ఇన్పుట్‌ను విశ్లేషించి తెలుగులో స్పందించండి. {prompt}",
+    'kn': f"ದಯವಿಟ್ಟು ಈ ಇನ್‌ಪುಟ್ ಅನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಕನ್ನಡದಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ. {prompt}",
+    'ml': f"ഈ ഇൻപുട്ട് വിശകലനം ചെയ്ത് മലയാളത്തിൽ പ്രതികരിക്കൂ. {prompt}",
+    'pa': f"ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਇਨਪੁੱਟ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ ਅਤੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ। {prompt}",
+    'or': f"ଦୟାକରି ଏହି ଇନପୁଟ୍‌କୁ ବିଶ୍ଲେଷଣ କରନ୍ତୁ ଏବଂ ଓଡ଼ିଆରେ ପ୍ରତିକ୍ରିୟା ଦିଅ। {prompt}",
+    'en': f"Please analyze this input and respond in English. {prompt}",
+    }
+
+
+    return localized_templates.get(language_code, f"Please analyze this image and respond in English. {prompt}")
 
 @cow_breed_bp.route('/api/new_chat', methods=['POST'])
 def new_chat():

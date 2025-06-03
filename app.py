@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.register_blueprint(cow_breed_bp)
 
 generative_ai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
-print( "Google Generative AI API Key:", os.environ.get("GOOGLE_API_KEY"))
+# print( "Google Generative AI API Key:", os.environ.get("GOOGLE_API_KEY"))
 system_prompt_text_model = """
 	You are an expert on Indian indigenous cow breeds (desi cows). Your role is to provide accurate,
 	educational information that:
@@ -36,6 +36,8 @@ You are an expert on Indian indigenous cow breeds (desi cows) with knowledge in 
    - If the image appears relatively normal, state that as well, but still recommend regular veterinary checkups
    - Do not provide treatment recommendations - focus only on observation and information
    - Limit your response strictly to a maximum of 250 tokens.
+   - You are a multilingual image analysis expert. Respond only in the language requested.
+   - Do not include English unless explicitly asked. Focus on clarity and use medical terminology as needed.
 Only provide information related to Indian cows and their health/benefits. If asked about unrelated topics,
 gently redirect the conversation to relevant aspects of Indian cow conservation, health, and promotion.
 
@@ -57,7 +59,7 @@ def image_to_text():
         image_bytes = base64.b64decode(image_base64)
 
 
-        localized_prompt = f"Please analyze this image and respond in {get_language_name(language)} language. {prompt}"
+        localized_prompt = get_localized_prompt(language, prompt)
 
         IMAGE_MODEL = "gemini-2.0-flash-exp"
         image_model = generative_ai.GenerativeModel(IMAGE_MODEL)
@@ -98,7 +100,7 @@ def image_to_text():
             }
             generated_text = error_messages.get(language, error_messages['en'])
 
-        print(f"Generated text in {language}: {generated_text}")
+        # print(f"Generated text in {language}: {generated_text}")
         return jsonify({'result': generated_text}), 200
 
     except Exception as e:
@@ -113,6 +115,23 @@ def image_to_text():
 
         error_msg = error_messages.get(language, error_messages['en'])
         return jsonify({'error': error_msg}), 500
+
+def get_localized_prompt(language_code, prompt):
+    localized_templates = {
+        'hi': f"कृपया इस छवि का विश्लेषण करें और अपनी प्रतिक्रिया हिंदी में दें। {prompt}",
+        'bn': f"এই ছবিটি বিশ্লেষণ করুন এবং বাংলায় উত্তর দিন। {prompt}",
+        'gu': f"કૃપા કરીને આ છબીને વિશ્લેષણ કરો અને ગુજરાતીમાં જવાબ આપો. {prompt}",
+        'mr': f"कृपया या चित्राचे विश्लेषण करा आणि मराठीत उत्तर द्या. {prompt}",
+        'ta': f"இந்த படத்தை பகுப்பாய்வு செய்து தமிழில் பதிலளிக்கவும். {prompt}",
+        'te': f"ఈ చిత్రాన్ని విశ్లేషించి తెలుగులో స్పందించండి. {prompt}",
+        'kn': f"ದಯವಿಟ್ಟು ಈ ಚಿತ್ರವನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಕನ್ನಡದಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿರಿ. {prompt}",
+        'ml': f"ഈ ചിത്രം വിശകലനം ചെയ്ത് മലയാളത്തിൽ പ്രതികരിക്കൂ. {prompt}",
+        'pa': f"ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਚਿੱਤਰ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ ਅਤੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ। {prompt}",
+        'or': f"ଦୟାକରି ଏହି ଛବିକୁ ବିଶ୍ଲେଷଣ କରନ୍ତୁ ଏବଂ ଓଡ଼ିଆରେ ପ୍ରତିକ୍ରିୟା ଦିଅ। {prompt}",
+        'en': f"Please analyze this image and respond in English. {prompt}",
+    }
+
+    return localized_templates.get(language_code, f"Please analyze this image and respond in English. {prompt}")
 
 def get_language_name(language_code):
     language_names = {
